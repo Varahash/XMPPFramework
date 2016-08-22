@@ -23,7 +23,7 @@
 #  Choose your libidn version and your currently-installed iOS SDK version:
 #
 VERSION="1.25"
-SDKVERSION="6.0"
+SDKVERSION="9.3"
 #
 #
 ###########################################################################
@@ -34,7 +34,7 @@ SDKVERSION="6.0"
 
 # No need to change this since xcode build will only compile in the
 # necessary bits from the libraries we create
-ARCHS="i386 armv7 armv7s"
+ARCHS="x86_64 i386 armv7 armv7s arm64"
 
 DEVELOPER=`xcode-select -print-path`
 
@@ -88,7 +88,7 @@ set -e # back to regular "bail out on error" mode
 
 for ARCH in ${ARCHS}
 do
-	if [ "${ARCH}" == "i386" ];
+	if [ "${ARCH}" == "i386" ] || [ "${ARCH}" == "x86_64" ];
 	then
 		PLATFORM="iPhoneSimulator"
         EXTRA_CONFIG=""
@@ -96,14 +96,14 @@ do
 	else
 		PLATFORM="iPhoneOS"
         EXTRA_CONFIG="--host=arm-apple-darwin10 --disable-asm"
-        EXTRA_CFLAGS="-DNO_ASM"
+        EXTRA_CFLAGS="-DNO_ASM -fembed-bitcode"
 	fi
 
 	mkdir -p "${INTERDIR}/${PLATFORM}${SDKVERSION}-${ARCH}.sdk"
 
 	./configure --disable-shared --enable-static ${EXTRA_CONFIG} \
     --prefix="${INTERDIR}/${PLATFORM}${SDKVERSION}-${ARCH}.sdk" \
-    CC="${CCACHE}${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer/usr/bin/gcc -arch ${ARCH}" \
+    CC="${CCACHE}${DEVELOPER}/usr/bin/gcc -arch ${ARCH}" \
     LDFLAGS="$LDFLAGS -L${OUTPUTDIR}/lib" \
     CFLAGS="$CFLAGS ${EXTRA_CFLAGS} -I${OUTPUTDIR}/include -isysroot ${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer/SDKs/${PLATFORM}${SDKVERSION}.sdk" \
     CPPFLAGS="$CPPFLAGS -I${OUTPUTDIR}/include -isysroot ${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer/SDKs/${PLATFORM}${SDKVERSION}.sdk"
@@ -125,7 +125,7 @@ OUTPUT_LIBS="libidn.a"
 for OUTPUT_LIB in ${OUTPUT_LIBS}; do
     INPUT_LIBS=""
     for ARCH in ${ARCHS}; do
-        if [ "${ARCH}" == "i386" ];
+        if [ "${ARCH}" == "i386" ] || [ "${ARCH}" == "x86_64" ];
         then
             PLATFORM="iPhoneSimulator"
         else
@@ -146,7 +146,7 @@ for OUTPUT_LIB in ${OUTPUT_LIBS}; do
 done
 
 for ARCH in ${ARCHS}; do
-    if [ "${ARCH}" == "i386" ];
+    if [ "${ARCH}" == "i386" ] || [ "${ARCH}" == "x86_64" ];
     then
         PLATFORM="iPhoneSimulator"
     else
@@ -161,7 +161,7 @@ for ARCH in ${ARCHS}; do
 done
 
 for ARCH in ${ARCHS}; do
-    if [ "${ARCH}" == "i386" ];
+    if [ "${ARCH}" == "i386" ] || [ "${ARCH}" == "x86_64" ];
     then
         PLATFORM="iPhoneSimulator"
     else
